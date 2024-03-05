@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relative Sliders</title>
+    <!-- Include noUiSlider CSS and JS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" rel="stylesheet">
+</head>
+<body>
+    <h2>Relative Sliders</h2>
+    <br>
+    <div id="slidersContainer">
+    </div>
+    <div id="slidesTotal">
+        Total: <span class='totalSlide'>0</span>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
+    <script>
+        // Define sliders data
+        const slidersData = [
+    {
+        stockName: "Tesla",
+        stockLink: "https://finance.yahoo.com/quote/TSLA/",
+        stockImg: "https://picsum.photos/400"
+    },
+    {
+        stockName: "Apple",
+        stockLink: "https://finance.yahoo.com/quote/AAPL/",
+        stockImg: "https://picsum.photos/400"
+    },
+    {
+        stockName: "Amazon",
+        stockLink: "https://finance.yahoo.com/quote/AMZN/",
+        stockImg: "https://picsum.photos/400"
+    },
+        ];
+
+        const slidesSum = document.querySelector('.totalSlide');
+
+        const sliders = [];
+
+        // Initialize sliders
+        const slidersContainer = document.getElementById('slidersContainer');
+
+        slidersData.forEach((slider, index) => {
+            const sliderDivContainer = document.createElement('div');
+            sliderDivContainer.classList.add('sliderContainer');
+            sliderDivContainer.innerHTML = `
+                <div class='slider'></div> <div class='sliderValue'>0</div>
+            `;
+
+            const sliderDiv = sliderDivContainer.querySelector('.slider')
+            const sliderValue = sliderDivContainer.querySelector('.sliderValue')
+
+            slidersContainer.appendChild(sliderDivContainer);
+
+            // Create noUiSlider for each slider
+            noUiSlider.create(sliderDiv, {
+                start: 0,
+                connect: 'lower',
+                range: {
+                    'min': 0,
+                    'max': 500
+                },
+                format: {
+                    to: value => parseInt(value),
+                    from: value => parseInt(value)
+                }
+            });
+
+            sliders.push(sliderDiv);
+
+            sliderDiv.noUiSlider.on('slide', function (values, handle) {
+                const total = sliders.reduce((sum,item)=>sum+=item.noUiSlider.get(),0)
+                if(total > 500){
+                    let difference = total-500;
+                    const otherSliders = sliders.filter(sli=>sli!=sliderDiv);
+                    while(difference>0){
+                        otherSliders.forEach(slider=>{
+                        if(slider.noUiSlider.get() != 0){
+                            if(difference > 0){
+                                let newVal = slider.noUiSlider.get()-1;
+                                if (!newVal || newVal < 0)
+                                    newVal = 0;
+                                difference--;
+                                slider.noUiSlider.set(newVal)
+                                slider.parentElement.querySelector('.sliderValue').innerHTML = newVal;
+                            }
+                        }
+                    })
+                    }
+
+                }
+                sliderValue.innerHTML = values[handle];
+                slidesSum.innerHTML = sliders.reduce((sum,item)=>sum+=item.noUiSlider.get(),0);
+            });
+        });
+    </script>
+</body>
+</html>
